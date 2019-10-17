@@ -2,14 +2,26 @@ const router = require('express').Router();
 const path = require('path');
 const fs = require('fs');
 
-const users = JSON.parse(fs.readFileSync(path.join('data', 'users.json'), { encoding: 'utf8' }));
+let users = [];
+
+try {
+  users = JSON.parse(fs.readFileSync(path.join('data', 'users.json'), { encoding: 'utf8' }));
+} catch (err) {
+  if (!fs.existsSync('logs')) {
+    fs.mkdirSync('logs');
+  }
+  fs.appendFileSync(path.join('logs', 'error.log'), String(err).concat('\n'));
+}
 
 router.get('/users', (req, res) => {
   res.send(users);
 });
 
 router.get('/users/:id', (req, res) => {
-  const user = users.find(el => el._id === req.params.id);
+  const user = users.find((el) => {
+    const { _id: id } = el;
+    return id === req.params.id;
+  });
   if (user) {
     res.send(user);
   } else {
