@@ -31,5 +31,5 @@ app.use(cardsRouter);
 app.use(usersRouter);
 
 app.use((req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
+  res.status(404).json({ message: 'Запрашиваемый ресурс не найден' });
 });
