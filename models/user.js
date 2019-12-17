@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     required: true,
-    match: /https?:[/][/].+[.].+[^.][/].*[^./;,\\][.](png|jpg|jpeg|gif|svg|bmp)/i,
+    match: /https?:[/][/].+[.].+[^.][/].*[^.;,\\]/i,
   },
 });
 
