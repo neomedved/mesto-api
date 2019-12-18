@@ -21,7 +21,7 @@ module.exports.deleteCardById = (req, res) => {
     res.status(404).json({ message: 'Карточка не найдена' });
   } else {
     Card.findById(req.params.cardId)
-      .populate()
+      .populate([{ path: 'likes', model: 'user' }, 'owner'])
       .then((card) => {
         if (!card) {
           res.status(404).json({ message: 'Карточка не найдена' });
