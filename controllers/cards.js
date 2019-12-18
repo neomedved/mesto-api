@@ -1,3 +1,4 @@
+const { isValid } = require('mongoose').Types.ObjectId;
 const Card = require('../models/card');
 
 module.exports.getCards = (req, res) => {
@@ -15,7 +16,17 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCardById = (req, res) => {
-  Card.findByIdAndDelete(req.params.cardId)
-    .then((card) => res.json(card))
-    .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
+  if (!isValid(req.params.cardId)) {
+    res.status(404).json({ message: 'Карточка не найдена' });
+  } else {
+    Card.findByIdAndDelete(req.params.cardId)
+      .then((card) => {
+        if (card) {
+          res.json(card);
+        } else {
+          res.status(404).json({ message: 'Карточка не найдена' });
+        }
+      })
+      .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
+  }
 };

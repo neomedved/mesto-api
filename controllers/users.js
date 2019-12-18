@@ -1,3 +1,4 @@
+const { isValid } = require('mongoose').Types.ObjectId;
 const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
@@ -7,15 +8,19 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.getUserById = (req, res) => {
-  User.findById(req.params.userId)
-    .then((user) => {
-      if (user) {
-        res.json(user);
-      } else {
-        res.status(404).json({ message: 'Пользователь не найден' });
-      }
-    })
-    .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
+  if (!isValid(req.params.userId)) {
+    res.status(404).json({ message: 'Пользователь не найден' });
+  } else {
+    User.findById(req.params.userId)
+      .then((user) => {
+        if (user) {
+          res.json(user);
+        } else {
+          res.status(404).json({ message: 'Пользователь не найден' });
+        }
+      })
+      .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
+  }
 };
 
 module.exports.createUser = (req, res) => {
