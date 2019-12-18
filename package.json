@@ -10,15 +10,16 @@
   "author": "Artem Medvedev",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.19.0",
     "cross-env": "^6.0.3",
     "express": "^4.17.1",
-    "path": "^0.12.7"
+    "mongoose": "^5.8.1"
   },
   "devDependencies": {
     "editorconfig": "^0.15.3",
-    "eslint": "^6.5.1",
+    "eslint": "^6.7.2",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-import": "^2.19.1",
     "nodemon": "^1.19.4"
   }
 }
