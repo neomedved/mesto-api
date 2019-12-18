@@ -10,6 +10,7 @@ module.exports.getCards = (req, res) => {
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
+
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).json(card))
     .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
@@ -19,12 +20,17 @@ module.exports.deleteCardById = (req, res) => {
   if (!isValid(req.params.cardId)) {
     res.status(404).json({ message: 'Карточка не найдена' });
   } else {
-    Card.findByIdAndDelete(req.params.cardId)
+    Card.findById(req.params.cardId)
+      .populate()
       .then((card) => {
-        if (card) {
-          res.json(card);
-        } else {
+        if (!card) {
           res.status(404).json({ message: 'Карточка не найдена' });
+        } else if (card.owner._id !== req.user._id) {
+          res.status(403).send('Вы не можете удалить эту карточку');
+        } else {
+          Card.findByIdAndDelete(req.params.cardId)
+            .then(() => res.status(200).json(card))
+            .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
         }
       })
       .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
