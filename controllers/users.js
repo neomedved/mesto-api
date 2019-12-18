@@ -34,7 +34,7 @@ module.exports.createUser = (req, res) => {
     .then((hash) => User.create({
       email, password: hash, name, about, avatar,
     }))
-    .then((user) => res.status(201).json(user))
+    .then(() => res.status(201).json({ message: 'Пользователь успешно создан' }))
     .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
 };
 
@@ -46,7 +46,7 @@ module.exports.login = (req, res) => {
       const token = jwt.sign({ _id: user._id }, 'ca0c855fe4365d8c59ca3f150ff5da7caf24bc2263594ecfda93b60f0ccbb33f');
 
       res.cookie('jwt', token, {
-        maxAge: '7d',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
         httpOnly: true,
         sameSite: true,
       })
