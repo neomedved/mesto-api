@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
+const { Joi, celebrate, errors } = require('celebrate');
 
 
 const CustomError = require('./errors/custom-error');
@@ -15,10 +16,8 @@ const cardsRouter = require('./routes/cards');
 const usersRouter = require('./routes/users');
 
 const { PORT = 3000 } = process.env;
-
-
 const app = express();
-app.listen(PORT);
+
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
@@ -31,8 +30,23 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email(),
+    password: Joi.string(),
+  }),
+}), login);
+
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email(),
+    password: Joi.string(),
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().uri(),
+  }),
+}), createUser);
 
 app.use(auth);
 
@@ -43,4 +57,7 @@ app.use((req, res, next) => {
   next(new CustomError(404, 'Запрашиваемый ресурс не найден'));
 });
 
+app.use(errors());
 app.use(error);
+
+app.listen(PORT);

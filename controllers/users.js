@@ -1,6 +1,5 @@
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { isValid } = require('mongoose').Types.ObjectId;
 const User = require('../models/user');
 const CustomError = require('../errors/custom-error');
 
@@ -11,19 +10,15 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.getUserById = (req, res, next) => {
-  if (!isValid(req.params.userId)) {
-    next(new CustomError(404, 'Пользователь не найден'));
-  } else {
-    User.findById(req.params.userId)
-      .then((user) => {
-        if (user) {
-          res.json(user);
-        } else {
-          throw new CustomError(404, 'Пользователь не найден');
-        }
-      })
-      .catch(next);
-  }
+  User.findById(req.params.userId)
+    .then((user) => {
+      if (user) {
+        res.json(user);
+      } else {
+        throw new CustomError(404, 'Пользователь не найден');
+      }
+    })
+    .catch(next);
 };
 
 module.exports.createUser = (req, res, next) => {

@@ -1,4 +1,3 @@
-const { isValid } = require('mongoose').Types.ObjectId;
 const Card = require('../models/card');
 const CustomError = require('../errors/custom-error');
 
@@ -22,27 +21,23 @@ module.exports.deleteCardById = (req, res, next) => {
   const { cardId } = req.params;
   const { userId } = req.user;
 
-  if (!isValid(cardId)) {
-    next(new CustomError(404, 'Карточка не найдена'));
-  } else {
-    Card.findById(cardId)
-      .populate([{ path: 'likes', model: 'user' }, 'owner'])
-      .then((card) => {
-        if (!card) {
-          throw new CustomError(404, 'Карточка не найдена');
-        } else if (String(card.owner._id) !== userId) {
-          throw new CustomError(403, 'Вы не можете удалить эту карточку');
-        } else {
-          Card.findByIdAndDelete(cardId)
-            .then((cardStillExists) => {
-              if (cardStillExists) {
-                res.json(card);
-              }
-              throw new Error(404, 'Карточка не найдена');
-            })
-            .catch(next);
-        }
-      })
-      .catch(next);
-  }
+  Card.findById(cardId)
+    .populate([{ path: 'likes', model: 'user' }, 'owner'])
+    .then((card) => {
+      if (!card) {
+        throw new CustomError(404, 'Карточка не найдена');
+      } else if (String(card.owner._id) !== userId) {
+        throw new CustomError(403, 'Вы не можете удалить эту карточку');
+      } else {
+        Card.findByIdAndDelete(cardId)
+          .then((cardStillExists) => {
+            if (cardStillExists) {
+              res.json(card);
+            }
+            throw new Error(404, 'Карточка не найдена');
+          })
+          .catch(next);
+      }
+    })
+    .catch(next);
 };
