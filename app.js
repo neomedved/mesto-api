@@ -4,11 +4,11 @@ const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const { Joi, celebrate, errors } = require('celebrate');
 
-
 const CustomError = require('./errors/custom-error');
 
 const auth = require('./middlwares/auth');
-const error = require('./middlwares/error');
+const customErrors = require('./middlwares/custom-errors');
+const { requestLogger, errorLogger } = require('./middlwares/logger');
 
 const { createUser, login } = require('./controllers/users');
 
@@ -29,6 +29,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+app.use(requestLogger);
 
 
 app.post('/signin', celebrate({
@@ -57,7 +59,10 @@ app.use((req, res, next) => {
   next(new CustomError(404, 'Запрашиваемый ресурс не найден'));
 });
 
+
+app.use(errorLogger);
+
 app.use(errors());
-app.use(error);
+app.use(customErrors);
 
 app.listen(PORT);
