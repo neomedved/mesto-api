@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const CustomError = require('../errors/custom-error');
 
 module.exports = (req, res, next) => {
   try {
@@ -6,6 +7,6 @@ module.exports = (req, res, next) => {
     req.user = payload;
     next();
   } catch (err) {
-    res.status(401).json({ message: 'Необходима авторизации' });
+    next(new CustomError(401, 'Необходима авторизация'));
   }
 };

@@ -2,30 +2,31 @@ const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { isValid } = require('mongoose').Types.ObjectId;
 const User = require('../models/user');
+const CustomError = require('../errors/custom-error');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.json(users))
-    .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   if (!isValid(req.params.userId)) {
-    res.status(404).json({ message: 'Пользователь не найден' });
+    next(new CustomError(404, 'Пользователь не найден'));
   } else {
     User.findById(req.params.userId)
       .then((user) => {
         if (user) {
           res.json(user);
         } else {
-          res.status(404).json({ message: 'Пользователь не найден' });
+          throw new CustomError(404, 'Пользователь не найден');
         }
       })
-      .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
+      .catch(next);
   }
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     email, password, name, about, avatar,
   } = req.body;
@@ -35,10 +36,10 @@ module.exports.createUser = (req, res) => {
       email, password: hash, name, about, avatar,
     }))
     .then(() => res.status(201).json({ message: 'Пользователь успешно создан' }))
-    .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
@@ -52,5 +53,5 @@ module.exports.login = (req, res) => {
       })
         .end();
     })
-    .catch((err) => res.status(401).json({ message: err.message }));
+    .catch(next);
 };
