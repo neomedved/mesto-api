@@ -10,7 +10,7 @@ module.exports.getCards = (req, res, next) => {
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
-  const { userId } = req.user;
+  const { _id: userId } = req.user;
 
   Card.create({ name, link, owner: userId })
     .then((card) => res.status(201).json(card))
@@ -19,7 +19,7 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCardById = (req, res, next) => {
   const { cardId } = req.params;
-  const { userId } = req.user;
+  const { _id: userId } = req.user;
 
   Card.findById(cardId)
     .populate([{ path: 'likes', model: 'user' }, 'owner'])
@@ -33,8 +33,9 @@ module.exports.deleteCardById = (req, res, next) => {
           .then((cardStillExists) => {
             if (cardStillExists) {
               res.json(card);
+            } else {
+              throw new Error(404, 'Карточка не найдена');
             }
-            throw new Error(404, 'Карточка не найдена');
           })
           .catch(next);
       }
