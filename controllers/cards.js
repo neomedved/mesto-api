@@ -1,47 +1,44 @@
-const { isValid } = require('mongoose').Types.ObjectId;
 const Card = require('../models/card');
+const CustomError = require('../errors/custom-error');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate([{ path: 'likes', model: 'user' }, 'owner'])
     .then((cards) => res.json(cards))
-    .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
-  const { userId } = req.user;
+  const { _id: userId } = req.user;
 
   Card.create({ name, link, owner: userId })
     .then((card) => res.status(201).json(card))
-    .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
-module.exports.deleteCardById = (req, res) => {
+module.exports.deleteCardById = (req, res, next) => {
   const { cardId } = req.params;
-  const { userId } = req.user;
+  const { _id: userId } = req.user;
 
-  if (!isValid(cardId)) {
-    res.status(404).json({ message: 'Карточка не найдена' });
-  } else {
-    Card.findById(cardId)
-      .populate([{ path: 'likes', model: 'user' }, 'owner'])
-      .then((card) => {
-        if (!card) {
-          res.status(404).json({ message: 'Карточка не найдена' });
-        } else if (String(card.owner._id) !== userId) {
-          res.status(403).send('Вы не можете удалить эту карточку');
-        } else {
-          Card.findByIdAndDelete(cardId)
-            .then((cardStillExists) => {
-              if (cardStillExists) {
-                res.status(200).json(card);
-              }
-              res.status(404).json({ message: 'Карточка не найдена' });
-            })
-            .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
-        }
-      })
-      .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
-  }
+  Card.findById(cardId)
+    .populate([{ path: 'likes', model: 'user' }, 'owner'])
+    .then((card) => {
+      if (!card) {
+        throw new CustomError(404, 'Карточка не найдена');
+      } else if (String(card.owner._id) !== userId) {
+        throw new CustomError(403, 'Вы не можете удалить эту карточку');
+      } else {
+        Card.findByIdAndDelete(cardId)
+          .then((cardStillExists) => {
+            if (cardStillExists) {
+              res.json(card);
+            } else {
+              throw new Error(404, 'Карточка не найдена');
+            }
+          })
+          .catch(next);
+      }
+    })
+    .catch(next);
 };

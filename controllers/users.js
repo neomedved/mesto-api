@@ -1,31 +1,30 @@
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { isValid } = require('mongoose').Types.ObjectId;
 const User = require('../models/user');
+const CustomError = require('../errors/custom-error');
+const devSecret = require('../data/dev-secret');
 
-module.exports.getUsers = (req, res) => {
+const { NODE_ENV, JWT_SECRET } = process.env;
+
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.json(users))
-    .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
-module.exports.getUserById = (req, res) => {
-  if (!isValid(req.params.userId)) {
-    res.status(404).json({ message: 'Пользователь не найден' });
-  } else {
-    User.findById(req.params.userId)
-      .then((user) => {
-        if (user) {
-          res.json(user);
-        } else {
-          res.status(404).json({ message: 'Пользователь не найден' });
-        }
-      })
-      .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
-  }
+module.exports.getUserById = (req, res, next) => {
+  User.findById(req.params.userId)
+    .then((user) => {
+      if (user) {
+        res.json(user);
+      } else {
+        throw new CustomError(404, 'Пользователь не найден');
+      }
+    })
+    .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     email, password, name, about, avatar,
   } = req.body;
@@ -35,15 +34,15 @@ module.exports.createUser = (req, res) => {
       email, password: hash, name, about, avatar,
     }))
     .then(() => res.status(201).json({ message: 'Пользователь успешно создан' }))
-    .catch(() => res.status(500).json({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'ca0c855fe4365d8c59ca3f150ff5da7caf24bc2263594ecfda93b60f0ccbb33f');
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : devSecret);
 
       res.cookie('jwt', token, {
         maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -52,5 +51,5 @@ module.exports.login = (req, res) => {
       })
         .end();
     })
-    .catch((err) => res.status(401).json({ message: err.message }));
+    .catch(next);
 };
