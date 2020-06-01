@@ -1,6 +1,6 @@
 # Mesto API
 ###### v1.0.0
-### API сервиса [Mesto](https://github.com/neomedved/Mesto-frontend), интерактивной страницы, куда можно добавлять фотографии, удалять их и ставить лайки.
+### API сервиса [Mesto](https://github.com/neomedved/Mesto-frontend), интерактивной страницы, куда можно добавлять фотографии, удалять их и ставить лайки. Стек: Node.js, Express, Webpack, MongoDB.
 ## [URL](https://api.mesto.neomedved.site)
 ### Развёртывание проекта:
 * Установка зависмостей: `npm install`
