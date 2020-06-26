@@ -2,7 +2,7 @@
 *v1.0.0*
 ## О проекте:
 API сервиса [Mesto](https://github.com/neomedved/mesto-frontend), интерактивной страницы, куда можно добавлять фотографии, удалять их и ставить лайки.\
-Стек: *Node.js, Express, Webpack, MongoDB*.\
+Стек: *Node.js, Express, MongoDB*.\
 **[URL](https://api.mesto.neomedved.site)**
 ### Развёртывание проекта:
 * Установка зависмостей: `npm install`
